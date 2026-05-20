@@ -9,6 +9,10 @@ from app.core.errors import (
     app_error_handler,
     validation_exception_handler,
 )
+from app.database import Base, engine
+
+# Important: importing models registers them with SQLAlchemy metadata.
+from app import models  # noqa: F401
 
 
 app = FastAPI(
@@ -16,6 +20,11 @@ app = FastAPI(
     version="0.1.0",
     description="AI-powered CRM email triage and agentic operations platform.",
 )
+
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 
 app.add_middleware(
