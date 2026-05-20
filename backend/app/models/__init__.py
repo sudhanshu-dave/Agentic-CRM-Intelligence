@@ -1,6 +1,7 @@
 from app.models.action import Action
 from app.models.contact import Contact
 from app.models.email import Email
+from app.models.knowledge_chunk import KnowledgeChunk
 from app.models.thread import EmailThread
 
 __all__ = [
@@ -8,4 +9,5 @@ __all__ = [
     "Contact",
     "Email",
     "EmailThread",
+    "KnowledgeChunk",
 ]
