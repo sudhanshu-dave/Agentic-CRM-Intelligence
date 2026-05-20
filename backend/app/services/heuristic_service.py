@@ -283,6 +283,12 @@ def run_heuristic_triage(
         urgency = "High" if is_urgent else "Medium"
         status = "Escalated" if is_urgent else "Received"
         requires_human = is_urgent
+    
+    elif "p0" in lowered or "production down" in lowered or "system down" in lowered:
+        category = "Bug Report"
+        urgency = "Critical"
+        status = "Escalated"
+        requires_human = True
 
     elif is_bug:
         category = "Bug Report"

@@ -50,6 +50,14 @@ def ensure_timezone_aware(dt: datetime) -> datetime:
         return dt.replace(tzinfo=timezone.utc)
     return dt
 
+def safe_datetime(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+
+    return dt
 
 def get_or_create_contact(
     db: Session,
@@ -92,10 +100,13 @@ def get_or_create_thread(
     clean_subject = normalize_text(payload.subject)
 
     if thread:
-        if timestamp < thread.first_seen_at:
+        first_seen_at = safe_datetime(thread.first_seen_at)
+        last_updated_at = safe_datetime(thread.last_updated_at)
+
+        if first_seen_at is None or timestamp < first_seen_at:
             thread.first_seen_at = timestamp
 
-        if timestamp > thread.last_updated_at:
+        if last_updated_at is None or timestamp > last_updated_at:
             thread.last_updated_at = timestamp
             thread.subject = clean_subject or thread.subject
 
@@ -115,7 +126,6 @@ def get_or_create_thread(
     db.flush()
 
     return thread
-
 
 def ingest_email(
     db: Session,
