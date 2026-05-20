@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import dashboard, emails, health, ingest, rag, threads
+from app.api import classification, dashboard, emails, health, ingest, rag, threads
 from app.config import settings
 from app.core.errors import (
     AppError,
@@ -46,6 +46,8 @@ app.include_router(dashboard.router)
 app.include_router(threads.router)
 app.include_router(emails.router)
 app.include_router(rag.router)
+app.include_router(classification.router)
+
 
 @app.get("/")
 def root():
