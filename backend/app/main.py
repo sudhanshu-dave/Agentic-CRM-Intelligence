@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import health
+from app.api import health, ingest
 from app.config import settings
 from app.core.errors import (
     AppError,
@@ -41,6 +41,7 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 
 app.include_router(health.router)
+app.include_router(ingest.router)
 
 
 @app.get("/")
