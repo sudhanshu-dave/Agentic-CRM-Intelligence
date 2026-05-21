@@ -59,6 +59,10 @@ The platform does not send customer emails automatically. It creates proposed ac
 
 ## Architecture
 
+The system follows an ingestion-to-review pipeline where emails are processed, enriched with policy context, classified, checked against safety rules, and routed to the UI for review.
+
+![System Flow](docs/System%20Flow.png)
+
 ```text
 Email Stream
     ↓
@@ -82,6 +86,14 @@ Human Review Queue
     ↓
 Analytics Dashboard
 ```
+
+---
+
+## ER Diagram
+
+The database schema stores emails, threads, contacts, knowledge chunks, and agent actions. JSON fields are used for heuristic flags, extracted entities, embeddings, and reasoning traces.
+
+![ER Diagram](docs/ER.png)
 
 ---
 
@@ -132,6 +144,17 @@ agentic-crm-intelligence/
 │   ├── package.json
 │   └── vite.config.js
 │
+├── docs/
+│   ├── ER.png
+│   ├── System Flow.png
+│   ├── architecture.md
+│   ├── er-diagram.md
+│   └── schema.sql
+│
+├── migrations/
+│   └── 001_initial_schema.sql
+│
+├── openapi.json
 ├── README.md
 └── .gitignore
 ```
@@ -251,6 +274,23 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8001/classify/batch/run?limit=100" `
 
 ---
 
+## Knowledge Base Files
+
+The RAG pipeline is seeded from the internal knowledge base files stored in the backend data directory.
+
+The knowledge base includes:
+
+- Pricing policy
+- SLA policy
+- Refund policy
+- API documentation
+- Compliance FAQ
+- Escalation matrix
+
+These files are chunked and indexed by the seeding script before classification and agent dry-runs.
+
+---
+
 ## API Endpoints
 
 ### Health
@@ -313,6 +353,26 @@ GET /actions/pending
 POST /actions/{action_id}/approve
 POST /actions/{action_id}/reject
 ```
+
+---
+
+## Additional Submission Artifacts
+
+The repository includes supporting documentation and generated artifacts:
+
+```text
+docs/architecture.md
+docs/er-diagram.md
+docs/schema.sql
+migrations/001_initial_schema.sql
+openapi.json
+```
+
+- `docs/architecture.md` documents the system flow and architecture decisions.
+- `docs/er-diagram.md` documents the database design.
+- `docs/schema.sql` contains the exported SQL schema.
+- `migrations/001_initial_schema.sql` contains the initial schema migration.
+- `openapi.json` contains the exported FastAPI OpenAPI specification.
 
 ---
 
@@ -543,6 +603,28 @@ The backend prevents conflicting review decisions:
 
 ---
 
+## Architecture Decisions and Trade-offs
+
+SQLite is used for local development and simple evaluation setup. For production deployment, PostgreSQL with pgvector or a managed vector database would be a better fit for scalable relational and vector search workloads.
+
+The RAG pipeline uses local knowledge-base files to avoid external infrastructure. This keeps the project reproducible while still demonstrating retrieval-augmented classification.
+
+The agent follows a dry-run design. It proposes actions and drafts but does not execute customer-facing communication directly. This design keeps legal, compliance, security, and high-risk support workflows under human control.
+
+A deterministic fallback classifier is included so that the system continues to function even if the LLM provider is unavailable or returns an invalid response.
+
+---
+
+## Known Limitations
+
+- The current implementation uses SQLite for local persistence.
+- The vector store is implemented locally rather than through a production vector database.
+- Web intelligence is represented as a controlled demo/enrichment layer and can be replaced with a real scraper or external reputation API.
+- The platform does not send actual emails.
+- The approval workflow records review decisions but does not integrate with external ticketing, CRM, or email systems.
+
+---
+
 ## Environment and Repository Hygiene
 
 Runtime configuration is handled through environment variables.
@@ -586,9 +668,3 @@ Implemented:
 - Human approval and rejection workflow
 - Human review frontend page
 - Inbox workspace with pagination and agent actions
-
----
-
-## Notes
-
-This project was built as a recruitment assignment/demo project. It focuses on architecture, safety, traceability, and an end-to-end workflow for CRM email triage.
