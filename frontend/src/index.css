@@ -735,3 +735,12 @@ pre {
   cursor: not-allowed;
   opacity: 0.45;
 }
+
+.compact-section {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.compact-section h4 {
+  margin: 0 0 12px;
+}

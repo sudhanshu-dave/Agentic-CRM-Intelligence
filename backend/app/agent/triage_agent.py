@@ -103,17 +103,29 @@ def run_triage_agent_dry_run(
 
     classification_result = classify_email(db=db, email_id=email.id)
     db.refresh(email)
+    classification = classification_result["classification"]
+    classification_metadata = {
+        "model_used": classification.get("model_used"),
+        "llm_provider": classification.get("llm_provider"),
+        "llm_attempted": classification.get("llm_attempted", False),
+        "llm_error": classification.get("llm_error"),
+        "model_reasoning_summary": classification.get("model_reasoning_summary"),
+    }
 
     add_trace(
         reasoning_trace,
         thought="Start by classifying the email with current thread and RAG context.",
         action="classify_email",
         observation={
-            "category": classification_result["classification"]["category"],
-            "urgency": classification_result["classification"]["urgency"],
-            "requires_human": classification_result["classification"]["requires_human"],
-            "confidence": classification_result["classification"]["confidence"],
-            "policy_refs": classification_result["classification"]["policy_refs"],
+            "category": classification.get("category"),
+            "urgency": classification.get("urgency"),
+            "requires_human": classification.get("requires_human"),
+            "confidence": classification.get("confidence"),
+            "policy_refs": classification.get("policy_refs"),
+            "model_used": classification_metadata["model_used"],
+            "llm_provider": classification_metadata["llm_provider"],
+            "llm_attempted": classification_metadata["llm_attempted"],
+            "llm_error": classification_metadata["llm_error"],
         },
         next_step="Retrieve full thread history before deciding final action.",
     )
@@ -241,17 +253,22 @@ def run_triage_agent_dry_run(
         saved_action_id = action.id
 
     return {
-        "mode": "dry_run",
-        "email": {
-            "id": email.id,
-            "message_id": email.message_id,
-            "sender": email.sender,
-            "subject": email.subject,
-            "category": email.category,
-            "urgency": email.urgency,
-            "status": email.status,
-            "requires_human": email.requires_human,
-            "confidence": email.confidence,
+    "mode": "dry_run",
+    "classification_metadata": classification_metadata,
+    "email": {
+        "id": email.id,
+        "message_id": email.message_id,
+        "sender": email.sender,
+        "subject": email.subject,
+        "category": email.category,
+        "urgency": email.urgency,
+        "status": email.status,
+        "requires_human": email.requires_human,
+        "confidence": email.confidence,
+        "model_used": classification_metadata["model_used"],
+        "llm_provider": classification_metadata["llm_provider"],
+        "llm_attempted": classification_metadata["llm_attempted"],
+        "llm_error": classification_metadata["llm_error"],
         },
         "thread_summary": summarize_thread(thread_history),
         "account_status": account_status,

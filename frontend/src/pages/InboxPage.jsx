@@ -30,6 +30,7 @@ function DecisionPanel({ agentResult }) {
   }
 
   const decision = agentResult.final_decision;
+  const metadata = agentResult.classification_metadata || agentResult.email || {};
 
   if (!decision) {
     return (
@@ -66,6 +67,34 @@ function DecisionPanel({ agentResult }) {
         </div>
       </div>
 
+      <div className="workspace-section compact-section">
+        <h4>LLM Classification Metadata</h4>
+
+        <div className="decision-grid">
+          <div>
+            <span>Provider</span>
+            <strong>{metadata.llm_provider || "fallback"}</strong>
+          </div>
+
+          <div>
+            <span>Model Used</span>
+            <strong>
+              {metadata.model_used || "deterministic-fallback-v1"}
+            </strong>
+          </div>
+
+          <div>
+            <span>LLM Attempted</span>
+            <strong>{metadata.llm_attempted ? "Yes" : "No"}</strong>
+          </div>
+
+          <div>
+            <span>LLM Error</span>
+            <strong>{metadata.llm_error || "None"}</strong>
+          </div>
+        </div>
+      </div>
+
       <p className="muted-text">{decision.reason}</p>
 
       {agentResult.proposed_reply ? (
@@ -84,7 +113,9 @@ function DecisionPanel({ agentResult }) {
 }
 
 function AuditSummary({ audit }) {
-  if (!audit) return null;
+  if (!audit) {
+    return null;
+  }
 
   return (
     <div className="workspace-section">
@@ -143,7 +174,9 @@ function AuditSummary({ audit }) {
 }
 
 function ThreadTimeline({ threadAudit }) {
-  if (!threadAudit) return null;
+  if (!threadAudit) {
+    return null;
+  }
 
   return (
     <div className="workspace-section">
@@ -263,7 +296,9 @@ export default function InboxPage() {
   }
 
   async function handleRunAgent() {
-    if (!selectedEmail) return;
+    if (!selectedEmail) {
+      return;
+    }
 
     try {
       setWorkspaceLoading(true);
@@ -283,7 +318,9 @@ export default function InboxPage() {
   }
 
   async function handleLoadAudit() {
-    if (!selectedEmail) return;
+    if (!selectedEmail) {
+      return;
+    }
 
     try {
       setWorkspaceLoading(true);
@@ -303,7 +340,9 @@ export default function InboxPage() {
   }
 
   async function handleOpenThread() {
-    if (!selectedEmail?.thread?.thread_id) return;
+    if (!selectedEmail?.thread?.thread_id) {
+      return;
+    }
 
     try {
       setWorkspaceLoading(true);
