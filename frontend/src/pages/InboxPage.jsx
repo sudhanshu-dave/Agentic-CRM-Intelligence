@@ -25,9 +25,20 @@ function SafeText({ children }) {
 }
 
 function DecisionPanel({ agentResult }) {
-  if (!agentResult) return null;
+  if (!agentResult) {
+    return null;
+  }
 
   const decision = agentResult.final_decision;
+
+  if (!decision) {
+    return (
+      <div className="workspace-section">
+        <h3>Agent Decision</h3>
+        <p className="muted-text">No decision returned by the agent.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="workspace-section">
