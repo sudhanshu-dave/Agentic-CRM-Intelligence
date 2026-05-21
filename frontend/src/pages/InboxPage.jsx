@@ -99,7 +99,7 @@ function DecisionPanel({ agentResult }) {
 
       {agentResult.proposed_reply ? (
         <>
-          <h4>Proposed Reply</h4>
+          <h4>Proposed Reply Draft — Approval Required</h4>
           <div className="proposed-content">{agentResult.proposed_reply}</div>
         </>
       ) : (

@@ -49,3 +49,27 @@ export async function getThreadAudit(threadId) {
   const response = await apiClient.get(`/audit/thread/${threadId}`);
   return response.data.data;
 }
+
+export async function getPendingActions(params = {}) {
+  const response = await apiClient.get("/actions/pending", { params });
+  return response.data.data;
+}
+
+export async function approveAction(actionId, approvedBy = "human_reviewer") {
+  const response = await apiClient.post(`/actions/${actionId}/approve`, {
+    approved_by: approvedBy,
+  });
+  return response.data.data;
+}
+
+export async function rejectAction(
+  actionId,
+  rejectedBy = "human_reviewer",
+  reason = "Rejected during human review."
+) {
+  const response = await apiClient.post(`/actions/${actionId}/reject`, {
+    rejected_by: rejectedBy,
+    reason,
+  });
+  return response.data.data;
+}
