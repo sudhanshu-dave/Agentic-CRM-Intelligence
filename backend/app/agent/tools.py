@@ -126,7 +126,7 @@ def draft_reply_tool(
             "Hello,\n\n"
             "We acknowledge receipt of your data portability request. "
             "Your request has been routed to our privacy operations team for review. "
-            "They will process it according to the applicable statutory response window. "
+            "They will process it according to the applicable 30-day statutory response window. "
             "For your security, we may need to verify your identity before releasing account data.\n\n"
             "Regards,\n"
             "Support Team\n\n"
@@ -164,6 +164,18 @@ def draft_reply_tool(
             "Thank you for flagging the discrepancy between the chatbot response and the billing policy. "
             "We are escalating this for review so the team can compare the chatbot guidance with the current "
             "refund policy and follow up carefully.\n\n"
+            "Regards,\n"
+            "Support Team\n\n"
+            f"Policy references: {', '.join(policy_refs)}"
+        )
+    if "pro-rata" in body or "prorata" in body or "non-profit" in body or "pricing" in body:
+        return (
+            "Hello,\n\n"
+            "Thanks for reaching out. Based on our pricing policy, registered non-profit organizations "
+            "may be eligible for a 30% discount on the Standard plan after verification. For mid-cycle "
+            "seat additions or upgrades, billing is calculated on a pro-rata basis for the remaining days "
+            "in the current billing period. Our billing team can confirm the exact amount before applying "
+            "the charge.\n\n"
             "Regards,\n"
             "Support Team\n\n"
             f"Policy references: {', '.join(policy_refs)}"

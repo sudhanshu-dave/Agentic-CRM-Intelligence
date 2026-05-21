@@ -182,8 +182,10 @@ def run_triage_agent_dry_run(
 
     policy_refs = [item["source_doc"] for item in rag_results]
     proposed_reply = None
-
-    if email.category != "Spam":
+    flags = email.heuristic_flags or {}
+    # Never even draft a reply for spam or security attacker messages.
+    # # This avoids accidental sends and makes the safety policy clear in the demo.
+    if not flags.get("security_flag") and not flags.get("spam_flag") and email.category != "Spam":
         proposed_reply = draft_reply_tool(
             email=email,
             tone="empathetic-professional",
