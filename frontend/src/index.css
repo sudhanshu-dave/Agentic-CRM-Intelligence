@@ -744,3 +744,73 @@ pre {
 .compact-section h4 {
   margin: 0 0 12px;
 }
+
+.review-list {
+  display: grid;
+  gap: 18px;
+}
+
+.review-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  padding: 22px;
+}
+
+.review-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.review-card-header h2 {
+  margin: 10px 0 4px;
+}
+
+.review-card-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.action-id {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.review-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.review-actions button,
+.refresh-button {
+  border: 1px solid #dbe3ef;
+  background: white;
+  color: #334155;
+  border-radius: 999px;
+  padding: 10px 16px;
+}
+
+.review-actions button:hover:not(:disabled),
+.refresh-button:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
+.review-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: white !important;
+}

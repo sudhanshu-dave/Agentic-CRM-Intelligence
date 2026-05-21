@@ -5,6 +5,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import AuditPage from "./pages/AuditPage";
 import DashboardPage from "./pages/DashboardPage";
 import InboxPage from "./pages/InboxPage";
+import HumanReviewPage from "./pages/HumanReviewPage";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "audit",
         element: <AuditPage />,
+      },
+      {
+        path: "review",
+        element: <HumanReviewPage />,
       },
     ],
   },

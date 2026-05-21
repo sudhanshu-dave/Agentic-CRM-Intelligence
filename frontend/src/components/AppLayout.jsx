@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   BarChart3,
   Bot,
+  CheckCircle2,
   Inbox,
   LayoutDashboard,
   ShieldCheck,
@@ -27,6 +28,11 @@ const navItems = [
     label: "Audit / Agent",
     path: "/audit",
     icon: Bot,
+  },
+  {
+    label: "Human Review",
+    path: "/review",
+    icon: CheckCircle2,
   },
 ];
 
