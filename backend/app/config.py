@@ -14,8 +14,13 @@ class Settings(BaseSettings):
     DATABASE_URL: str = DEFAULT_DATABASE_URL
     CORS_ORIGINS: str = "http://localhost:5173"
 
+    ENABLE_LLM_CLASSIFICATION: bool = True
+    GROQ_API_KEY: str | None = None
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=BACKEND_DIR / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )

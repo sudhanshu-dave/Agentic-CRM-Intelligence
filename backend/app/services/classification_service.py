@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import AppError
 from app.models import Email
 from app.rag.retriever import search_knowledge_base
+from app.llm.client import classify_email_with_llm, get_last_llm_error
 
 
 def build_thread_context(email: Email) -> str:
@@ -243,6 +244,61 @@ def fallback_structured_classification(email: Email, rag_results: list[dict]) ->
     }
 
 
+def apply_safety_overrides(
+    email: Email,
+    classification: dict[str, Any],
+) -> dict[str, Any]:
+    flags = email.heuristic_flags or {}
+
+    if flags.get("spam_flag"):
+        classification["category"] = "Spam"
+        classification["urgency"] = "Low"
+        classification["requires_human"] = False
+        classification["suggested_reply"] = None
+        classification["escalation_reason"] = None
+        classification["confidence"] = max(classification.get("confidence", 0.0), 0.95)
+        classification["model_reasoning_summary"] = (
+            classification.get("model_reasoning_summary", "")
+            + " Safety override: spam messages must be ignored."
+        ).strip()
+
+    if flags.get("internal_flag"):
+        classification["category"] = "Internal"
+        classification["urgency"] = "Low"
+        classification["requires_human"] = False
+        classification["suggested_reply"] = None
+        classification["escalation_reason"] = None
+        classification["confidence"] = max(classification.get("confidence", 0.0), 0.92)
+        classification["model_reasoning_summary"] = (
+            classification.get("model_reasoning_summary", "")
+            + " Safety override: internal messages should not trigger customer replies."
+        ).strip()
+
+    if flags.get("security_flag"):
+        classification["urgency"] = "Critical"
+        classification["requires_human"] = True
+        classification["suggested_reply"] = None
+        classification["escalation_reason"] = (
+            "Potential security incident detected; auto-reply is not allowed."
+        )
+        classification["confidence"] = max(classification.get("confidence", 0.0), 0.96)
+        classification["model_reasoning_summary"] = (
+            classification.get("model_reasoning_summary", "")
+            + " Safety override: security threats must be escalated without reply."
+        ).strip()
+
+    if flags.get("legal_flag") or classification.get("category") == "Legal":
+        classification["category"] = "Legal"
+        classification["urgency"] = "Critical"
+        classification["requires_human"] = True
+        classification["escalation_reason"] = (
+            classification.get("escalation_reason")
+            or "Legal issue requires human review."
+        )
+        classification["confidence"] = max(classification.get("confidence", 0.0), 0.9)
+
+    return classification
+
 def classify_email(
     db: Session,
     email_id: int,
@@ -257,12 +313,37 @@ def classify_email(
             details={"email_id": email_id},
         )
 
+    thread_context = build_thread_context(email)
+
     rag_query = build_rag_query(email)
     rag_results = search_knowledge_base(db=db, query=rag_query, top_k=3)
 
-    classification = fallback_structured_classification(
+    classification = classify_email_with_llm(
         email=email,
+        thread_context=thread_context,
         rag_results=rag_results,
+    )
+
+    llm_error = None
+    if classification is None:
+        llm_error = get_last_llm_error()
+        classification = fallback_structured_classification(
+            email=email,
+            rag_results=rag_results,
+        )
+        classification["llm_attempted"] = bool(llm_error)
+        classification["llm_error"] = llm_error
+    else:
+        classification["policy_refs"] = [
+            result["source_doc"] for result in rag_results
+        ]
+        classification["rag_context"] = rag_results
+        classification["llm_attempted"] = True
+        classification["llm_error"] = None
+
+    classification = apply_safety_overrides(
+        email=email,
+        classification=classification,
     )
 
     email.category = classification["category"]
@@ -276,6 +357,7 @@ def classify_email(
         email.status = "Ignored"
     elif email.requires_human or email.urgency == "Critical":
         email.status = "Escalated"
+
         if email.thread:
             email.thread.status = "Escalated"
     else:
