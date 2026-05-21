@@ -4,6 +4,8 @@ A full-stack CRM email intelligence platform for ingesting customer emails, clas
 
 The system is designed for support and customer-success workflows where incoming emails need to be prioritized, escalated, audited, and reviewed before any customer-facing action is taken.
 
+Git repo: https://github.com/sudhanshu-dave/Agentic-CRM-Intelligence.git
+
 ---
 
 ## Overview
